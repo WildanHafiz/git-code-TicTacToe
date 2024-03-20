@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (boardState[index] === '' && !gameOver) {
             boardState[index] = currentPlayer;
             square.textContent = currentPlayer;
+            currentPlayer.classList.add('player');
             checkWin();
             currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
             updateStatus();
