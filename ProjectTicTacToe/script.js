@@ -2,15 +2,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const homeScreen = document.getElementById('homeScreen');
     const homebuttons = document.getElementById('buttons');
     const about = document.getElementById('about');
+    const aboutButtons = document.getElementById('about-buttons');
     const board = document.getElementById('board');
     const gameStatus = document.getElementById('game-status');
     const status = document.getElementById('status');
     const resetButton = document.getElementById('resetButton');
     const headline = document.getElementById('headline');
+    const profilegame = document.getElementById('profile-game');
+    const devProfile = document.getElementById('devProfile');
+    const flowchart = document.getElementById('flowchart');
 
     let currentPlayer = 'X';
     let boardState = ['', '', '', '', '', '', '', '', ''];
     let gameOver = false;
+    let aboutDrawn = false;
+
 
     const showHome = () => {
         homeScreen.style.display = 'block';
@@ -18,6 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
         about.style.display = 'none';
         board.style.display = 'none';
         gameStatus.style.display = 'none';
+        aboutButtons.style.display = 'none';
     };
 
     // Function to show the about section
@@ -28,6 +35,12 @@ document.addEventListener('DOMContentLoaded', () => {
         about.style.display = 'block';
         board.style.display = 'none';
         gameStatus.style.display = 'none';
+        aboutButtons.style.display = 'flex';
+
+        if (!aboutDrawn) {
+            drawabout();
+            aboutDrawn = true; // Set the flag to true after drawing about section
+        }
     };
 
     // Function to show the game board
@@ -38,7 +51,20 @@ document.addEventListener('DOMContentLoaded', () => {
         about.style.display = 'none';
         board.style.display = 'grid';
         gameStatus.style.display = 'block';
+        aboutButtons.style.display = 'none';
     };
+
+    const showProfile = () => {
+        flowchart.style.display = 'none';
+        profilegame.style.display = 'flex';
+        devProfile.style.display = 'flex';
+    }
+
+    const showFlowchart = () => {
+        devProfile.style.display = 'none';
+        profilegame.style.display = 'flex';
+        flowchart.style.display = 'flex';
+    }
 
     // Function to handle button clicks
     const handleButtonClick = (section) => {
@@ -48,6 +74,14 @@ document.addEventListener('DOMContentLoaded', () => {
             showAbout();
         } else if (section === 'board') {
             showBoard();
+        }
+    };
+    
+    const handleButtonClick2 = (section) => {
+        if (section === 'devProfile') {
+            showProfile();
+        } else if (section === 'flowchart') {
+            showFlowchart();
         }
     };
 
@@ -90,12 +124,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         aboutButton.addEventListener('click', () => {
             handleButtonClick('about');
-            drawabout();
         });
     
     }
     drawHome();
 
+    //menggambar about
     const drawabout = () => {
         about.classList.add('about');
         let aboutHeadline = document.createElement('h1');
@@ -108,13 +142,33 @@ document.addEventListener('DOMContentLoaded', () => {
         let backButton = document.createElement('button');
         backButton.classList.add('backButton');
         backButton.innerHTML = 'Back Home';
-        about.appendChild(backButton);
+        aboutButtons.appendChild(backButton);
+
+        let flowchartButton = document.createElement('button');
+        flowchartButton.classList.add('flowchartButton');
+        flowchartButton.innerHTML = 'Flowchart Game'
+        aboutButtons.appendChild(flowchartButton);
+
+        let profileButton = document.createElement('button');
+        profileButton.classList.add('profileButton');
+        profileButton.innerHTML = 'Devs - Profile';
+        aboutButtons.appendChild(profileButton);
+        
     
         backButton.addEventListener('click', () => {
             handleButtonClick('home');
         });
+
+        profileButton.addEventListener('click', () => {
+            handleButtonClick2('devProfile');
+        });
+
+        flowchartButton.addEventListener('click', () => {
+            handleButtonClick2('flowchart');
+        });
+
+        
     }
-    
 
     // Fungsi untuk menangani klik pada kotak
     function handleSquareClick(square) {
@@ -133,21 +187,30 @@ document.addEventListener('DOMContentLoaded', () => {
     const drawGameover = (result) => {
         const gameoverBoard = document.getElementById('gameover-board');
         gameoverBoard.classList.add('gameover-board');
-        let gameoverDisplay = document.createElement('h1');
-        gameoverDisplay.innerHTML = 'Game Over';
-        gameoverBoard.appendChild(gameoverDisplay);
+        
+        let gameoverTitle = document.createElement('h1');
+        if (result.includes('wins')) {
+            gameoverTitle.textContent = 'Congratulations!';
+            gameoverTitle.classList.add('congratulations-animation');
+
+        } else {
+            gameoverTitle.textContent = 'Game Over';
+        }
+        gameoverBoard.appendChild(gameoverTitle);
+    
         let message = document.createElement('h2');
-        message.innerHTML = result;
+        message.textContent = result;
         gameoverBoard.appendChild(message);
+    
         let gameoverButton =  document.createElement('button');
         gameoverButton.classList.add('gameover-button');
-        gameoverButton.innerHTML = 'Back to Home';
+        gameoverButton.textContent = 'Back to Home';
         gameoverBoard.appendChild(gameoverButton);
+    
         gameoverButton.addEventListener('click', () => {
             location.reload();
-        })
+        });
     }
-
 
     // Fungsi untuk memeriksa kemenangan
     function checkWin() {
@@ -164,11 +227,22 @@ document.addEventListener('DOMContentLoaded', () => {
             if (boardState[a] && boardState[a] === boardState[b] && boardState[a] === boardState[c]) {
                 result = `Player ${currentPlayer} wins!`;
                 gameOver = true;
-                board.style.display = 'none';
+                drawGameover(result);
+
+                triggerConfetti();
+
+                 board.style.display = 'none';
                 status.style.display = 'none';
                 resetButton.style.display = 'none';
                 headline.style.display = 'none';
-                drawGameover(result);
+
+                // canvas.confetti = canvas.confetti || confetti.create(canvas, { resize: true });
+
+                // canvas.confetti({
+                //     spread: 70,
+                //     origin: { y: 1.2 }
+                // });
+
                 return;
             }
         }
@@ -182,6 +256,25 @@ document.addEventListener('DOMContentLoaded', () => {
             drawGameover(result);
             gameOver = true;
             return;
+        }
+
+        function triggerConfetti() {
+            const confettiCount = 100; // Number of confetti particles
+            const duration = 5000; // Duration of animation in milliseconds
+        
+            for (let i = 0; i < confettiCount; i++) {
+                const confetti = document.createElement('div');
+                confetti.classList.add('confetti');
+                confetti.style.left = Math.random() * window.innerWidth + 'px';
+                confetti.style.animationDuration = (Math.random() * duration + duration / 2) / 1000 + 's';
+                document.body.appendChild(confetti);
+            }
+        
+            setTimeout(() => {
+                document.querySelectorAll('.confetti').forEach((el) => {
+                    el.remove();
+                });
+            }, duration);
         }
     }
 
